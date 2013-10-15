@@ -2,85 +2,90 @@ package main
 
 import (
 	"fmt"
-	"reflect"
 )
+
+
 
 type OrderedMap struct {
 	// maps a key to a value
-	Map map[interface{}]interface{}
+	Map map[string]string
 
 	// maps a key to an index in the KeyOrderArray
-	KeyOrderMap map[interface{}]int
+	KeyOrderMap map[string]int
 
 	// the order of keys added to Map
-	KeyOrderArray []interface{}
-
-	// holds the data type for the key/values
-	keyType interface{}
-	valueType interface{}
-
-	ValueFromKey *func(interface{})interface{}
+	KeyOrderArray []string
+	count int
 }
 
-// validateTypes sets the types if the Map is empty, otherwise
-// insures that the key and value are of the correct types
-// for operations.
-func (om *OrderedMap) validateTypes(key, value interface{}) (err error) {
-//	if len(om.Map) == 0 {
-		om.keyType = reflect.TypeOf(key)
-		om.valueType = reflect.TypeOf(value)
-		om.Map = make(map[interface{}]interface{}, 0)
-		om.KeyOrderArray = make([]interface{}, 0)
-		om.KeyOrderMap = make(map[interface{}]int, 0)
-	// } else {
-
-	// }
-
-	return nil
+func New() *OrderedMap {
+	om := OrderedMap{
+		Map: make(map[string]string),
+		KeyOrderMap: make(map[string]int),
+		KeyOrderArray: make([]string, 0),
+	}
+	return &om
 }
 
 // Set sets the `key` to the `value`.
-func (om *OrderedMap) Set(key, value interface{}) {
-	err := om.validateTypes(key, value)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	value, ok := om.Map[key]
+func (om *OrderedMap) Set(key, value string) {
+	_, ok := om.Map[key]
 
 	// add non-existent key
 	if !ok {
-		om.KeyOrderMap[key] = len(om.Map)
+		om.KeyOrderMap[key] = om.count
 		om.KeyOrderArray = append(om.KeyOrderArray, key)
+		om.count += 1
 	}
-
 	om.Map[key] = value
+
 }
 
 // Get retrieves the value from om.Map if it exists
-func (om *OrderedMap) Get(key interface{}) (interface{}, bool) {
+func (om *OrderedMap) Get(key string) (string, bool) {
 	val, exists := om.Map[key]
 	return val, exists
 }
 
-func InterfaceToInt(i interface{}) int {
-	defer recover(
-		func()nil{}()
-	)
-	val, ok := i.(int)
-	if ok {
-		return val
+// Delete removes a key/value from the OrderedMap. If it does not exist
+// in the map it is a no-op.
+func (om *OrderedMap) Delete(key string) {
+	i, ok := om.KeyOrderMap[key]
+	if !ok {
+		return
 	}
-	panic("value not converted")
+	om.KeyOrderArray[i] = ""
+
+	delete(om.KeyOrderMap, key)
+
+	delete(om.Map, key)
 }
 
 func main() {
-	o := new(OrderedMap)
+	o := New()
 
-	o.Set("cat", 9)
-	o.Set("dog", 10)
+	o.Set("cat", "kitty")
+	o.Set("dog", "doggy")
+	o.Set("seal", "nails")
 
+	val, ok := o.Get("cat")
+	fmt.Println("val", val)
+	fmt.Println("ok", ok)
 
-	val := o.ValueForKey(`cat`)
-	fmt.Println("o.Get(`cat`)", val)
+	val, ok = o.Get("dog")
+	fmt.Println("val", val)
+	fmt.Println("ok", ok)
+
+	val, ok = o.Get("whale")
+	fmt.Println("val", val)
+	fmt.Println("ok", ok)
+
+	o.Delete("cat")
+	o.Delete("dog")
+
+	o.Set("chillins", "beer")
+	o.Set("oxygen", "ladies")
+	o.Delete("seal")
+
+	fmt.Printf("%+v\n", o)
 }
