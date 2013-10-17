@@ -1,13 +1,16 @@
-package main
+package om
 
 import (
 	"fmt"
+	"errors"
 )
 
 // Link holds the information for a doubly linked list
 // which holds the key as a string, the
 type Link struct {
-	value string
+	key string
+	value interface{}
+
 	previous *Link
 	next *Link
 }
@@ -28,12 +31,13 @@ func New() *OrderedMap {
 }
 
 // Set sets the `key` to the `value`.
-func (om *OrderedMap) Set(key, value string) {
+func (om *OrderedMap) Set(key string, value interface{}) {
 	retrievedLink, ok := om.Map[key]
 
 	// add non existent key to map
 	if !ok {
 		link := &Link{
+			key: key,
 			value: value,
 		}
 
@@ -47,6 +51,7 @@ func (om *OrderedMap) Set(key, value string) {
 
 			// set this link's 'previous' link as most recent 'endLink'
 			link.previous = lastEnd
+			// the link.next is defaulted to nil
 
 			// set this new link as the 'next' link for
 			// the om.endLink
@@ -62,7 +67,7 @@ func (om *OrderedMap) Set(key, value string) {
 }
 
 // Get returns the value of the link found by the key
-func (om *OrderedMap) Get(key string) (string, bool) {
+func (om *OrderedMap) Get(key string) (interface{}, bool) {
 	retrievedLink, exists := om.Map[key]
 	if !exists {
 		return "", false
@@ -89,6 +94,7 @@ func (om *OrderedMap) Delete(key string) {
 		om.startLink = next
 	}
 
+	// if the retrieved link was not the first item
 	if previous != nil {
 		previous.next = next
 	}
@@ -97,6 +103,7 @@ func (om *OrderedMap) Delete(key string) {
 		om.endLink = previous
 	}
 
+	// if the retrieved link was not the end link
 	if next != nil {
 		next.previous = previous
 	}
@@ -104,59 +111,22 @@ func (om *OrderedMap) Delete(key string) {
 	delete(om.Map, key)
 }
 
-
-
-func main() {
-	o := New()
-
-	o.Set("cat", "kitty")
-	o.Set("dog", "doggy")
-	o.Set("seal", "nails")
-
-	fmt.Printf("%+v\n", o)
-
-	val, _ := o.Get("cat")
-	fmt.Println("val", val)
-	val, _ = o.Get("dog")
-	fmt.Println("val", val)
-	val, _ = o.Get("seal")
-	fmt.Println("val", val)
-
-	o.Delete("seal")
-	fmt.Printf("%+v\n", o)
-
-	o.Delete("cat")
-	fmt.Printf("%+v\n", o)
-
-	o.Delete("dog")
-	fmt.Printf("%+v\n", o)
-
-	o.Set("cat", "kitty")
-	o.Set("dog", "doggy")
-	o.Set("seal", "nails")
-
-	fmt.Printf("%+v\n", o)
-
-	o.Delete("cat")
-	fmt.Printf("%+v\n", o)
-
-	o.Delete("seal")
-	fmt.Printf("%+v\n", o)
-
-	o.Delete("dog")
-	fmt.Printf("%+v\n", o)
-
-	o.Set("cat", "kitty")
-	o.Set("dog", "doggy")
-	o.Set("seal", "nails")
-
-	o.Delete("dog")
-	fmt.Printf("%+v\n", o)
-
-	o.Delete("cat")
-	fmt.Printf("%+v\n", o)
-
-	o.Delete("seal")
-	fmt.Printf("%+v\n", o)
-
+// Pop removes and returns the last value,  added to the OrderedMap
+func (om *OrderedMap) Pop() (key string, value interface{}, err error) {
+	if om.endLink == nil {
+		return "", "", errors.New("OrderedMap is empty")
+	}
+	key, value = om.endLink.key, om.endLink.value
+	om.Delete(key)
+	return key, value, nil
 }
+
+// func (om *OrderedMap) SliceValues(start, stop, skip int) []string
+
+// func (om *OrderedMap) SliceKeys(start, stop, skip int) []string
+
+// func (om *OrderedMap) Keys()
+
+// func (om *OrderedMap) Values()
+
+// func (om *OrderedMap) Items() (key, value string)
