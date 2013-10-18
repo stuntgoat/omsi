@@ -1,4 +1,4 @@
-package om
+package omsi
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 )
 
 // Link holds the information for a doubly linked list
-// which holds the key as a string, the
+// which also holds the key.
 type Link struct {
 	key string
 	value interface{}
@@ -23,6 +23,7 @@ type OrderedMap struct {
 	endLink *Link
 }
 
+// New returns an OrderedMap with memory allocated for the Map
 func New() *OrderedMap {
 	om := OrderedMap{
 		Map: make(map[string]*Link),
@@ -32,38 +33,39 @@ func New() *OrderedMap {
 
 // Set sets the `key` to the `value`.
 func (om *OrderedMap) Set(key string, value interface{}) {
-	retrievedLink, ok := om.Map[key]
+	retrievedLink, exists := om.Map[key]
 
-	// add non existent key to map
-	if !ok {
-		link := &Link{
-			key: key,
-			value: value,
-		}
-
-		// first item
-		if len(om.Map) == 0 {
-			om.startLink = link
-			om.endLink = link
-		} else {
-			// get the most recent 'endLink'
-			lastEnd := om.endLink
-
-			// set this link's 'previous' link as most recent 'endLink'
-			link.previous = lastEnd
-			// the link.next is defaulted to nil
-
-			// set this new link as the 'next' link for
-			// the om.endLink
-			lastEnd.next = link
-
-			// set this new link as the end
-			om.endLink = link
-		}
-		om.Map[key] = link
+	if exists {
+		retrievedLink.value = value
 		return
 	}
-	retrievedLink.value = value
+
+	// add non existent key to map
+	link := &Link{
+		key: key,
+		value: value,
+	}
+
+	// first item
+	if len(om.Map) == 0 {
+		om.startLink = link
+		om.endLink = link
+	} else {
+		// get the most recent 'endLink'
+		lastEnd := om.endLink
+
+		// set this link's 'previous' link as most recent 'endLink'
+		link.previous = lastEnd
+		// the link.next is defaulted to nil
+
+		// set this new link as the 'next' link for
+		// the om.endLink
+		lastEnd.next = link
+
+		// set this new link as the end
+		om.endLink = link
+	}
+	om.Map[key] = link
 }
 
 // Get returns the value of the link found by the key
@@ -111,22 +113,43 @@ func (om *OrderedMap) Delete(key string) {
 	delete(om.Map, key)
 }
 
-// Pop removes and returns the last value,  added to the OrderedMap
+// Pop removes and returns the last key, value, added to the OrderedMap, or
+// an error.
 func (om *OrderedMap) Pop() (key string, value interface{}, err error) {
 	if om.endLink == nil {
-		return "", "", errors.New("OrderedMap is empty")
+		return key, value, errors.New("OrderedMap is empty")
 	}
 	key, value = om.endLink.key, om.endLink.value
 	om.Delete(key)
 	return key, value, nil
 }
 
-// func (om *OrderedMap) SliceValues(start, stop, skip int) []string
+// Keys returns a slice of keys in order in which they were added
+func (om *OrderedMap) Keys() (keys []string) {
+	keys = make([]string, 0)
 
-// func (om *OrderedMap) SliceKeys(start, stop, skip int) []string
+	var link = om.startLink
+	for {
+		if link == nil {
+			break
+		}
+		keys = append(keys, link.key)
+		link = link.next
+	}
+	return
+}
 
-// func (om *OrderedMap) Keys()
+// Values returns a slice of values in order in which they were added
+func (om *OrderedMap) Values() (values []interface{}) {
+	values = make([]interface{}, 0)
 
-// func (om *OrderedMap) Values()
-
-// func (om *OrderedMap) Items() (key, value string)
+	var link = om.startLink
+	for {
+		if link == nil {
+			break
+		}
+		values = append(values, link.value)
+		link = link.next
+	}
+	return
+}
