@@ -50,8 +50,8 @@ func Test_Delete(t *testing.T) {
 	if exists {
 		t.Error("Deleted failed to remove value")
 	}
-	if dog != "" {
-		msg := fmt.Sprintf("Deleted failed to remove value; expected empty string, got %s", dog)
+	if dog != nil {
+		msg := fmt.Sprintf("Deleted failed to remove value; expected nil, got %v", dog)
 		t.Error(msg)
 	}
 

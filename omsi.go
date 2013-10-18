@@ -71,7 +71,7 @@ func (om *OrderedMap) Set(key string, value interface{}) {
 func (om *OrderedMap) Get(key string) (interface{}, bool) {
 	retrievedLink, exists := om.Map[key]
 	if !exists {
-		return "", false
+		return nil, false
 	}
 
 	return retrievedLink.value, true
