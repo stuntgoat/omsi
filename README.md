@@ -3,41 +3,46 @@
 `OrderedMap` is a data structure that maps a string key to an interface{} value in Go.
 
 Example:
-
-    om := omsi.New()
-
-    om.Set("cat", "funny")
-    om.Set("seal", "wat")
-    om.Set("dog", "happy")
+```
+func main() {
 
 
-    key, value, err := om.Pop()
-    // dog
-    fmt.Println("key", key)
+	om := omsi.New()
 
-    // happy
-    fmt.Println("value", value)
-
-    // nil
-    fmt.Println("err", err)
+	om.Set("cat", "funny")
+	om.Set("seal", "wat")
+	om.Set("dog", "happy")
 
 
-    keys := om.Keys()
+	key, value, err := om.Pop()
 
-    // []string{'cat', 'seal'}
+	// dog
+	fmt.Println("key", key)
+
+	// happy
+	fmt.Println("value", value)
+
+	// nil
+	fmt.Println("err", err)
+
+
+	keys := om.Keys()
+
+	// [cat seal]
     fmt.Println("keys", keys)
 
 
-    values := om.Values()
+	values := om.Values()
 
-    // []string{'funny', 'wat'}
-    fmt.Println("values", values)
-
-
-    om.Delete('cat')
+	// [funny wat]
+	fmt.Println("values", values)
 
 
-    values := om.Values()
+	om.Delete('cat')
 
-    // []string{'wat'}
-    fmt.Println("values", values)
+	values := om.Values()
+
+	// [wat]
+	fmt.Println("values", values)
+}
+```
