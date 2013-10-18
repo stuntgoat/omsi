@@ -1,5 +1,4 @@
-`Ordered Map: string to interface{}`
-===================================
+`Ordered Map: String keys to Interface{} values`
 
 `OrderedMap` is a data structure that maps a string key to an interface{} value in Go.
 
