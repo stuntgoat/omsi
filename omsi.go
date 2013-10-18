@@ -1,7 +1,6 @@
 package omsi
 
 import (
-	"fmt"
 	"errors"
 )
 
